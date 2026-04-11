@@ -1,9 +1,24 @@
+------------------------------
+--  Nova Safety - Config    --
+------------------------------
+
+
 Config = {}
 
 Config.Command = 'Novasafe'
 Config.DefaultHudVisible = true
 Config.ShowZoneRadius = true
 Config.RefreshIntervalMs = 250
+
+Config.HudAccess = {
+    Enabled = false,
+    Provider = 'Badger_Discord_API',
+    DenyMessage = 'You do not have permission to open the Nova Safety HUD.',
+    BadgerRoles = {
+        '123456789012345678'
+    },
+    AcePermission = 'nova-safety.hud'
+}
 
 Config.Zones = {
     {

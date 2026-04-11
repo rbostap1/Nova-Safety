@@ -157,6 +157,10 @@ h1 {
     background: var(--panel-strong);
 }
 
+.editor-panel {
+    background: rgba(20, 24, 36, 0.95);
+}
+
 .list-header {
     display: flex;
     justify-content: space-between;
@@ -210,11 +214,83 @@ h1 {
     white-space: nowrap;
 }
 
+.editor-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.editor-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.editor-field {
+    display: grid;
+    gap: 6px;
+}
+
+.editor-field-wide {
+    width: 100%;
+}
+
+.editor-field input {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    padding: 11px 12px;
+    outline: none;
+}
+
+.editor-field input:focus {
+    border-color: rgba(120, 211, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(120, 211, 255, 0.12);
+}
+
+.editor-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.editor-actions button {
+    border: 0;
+    border-radius: 12px;
+    padding: 11px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.editor-actions button.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: #08111a;
+}
+
+.editor-actions button:hover {
+    filter: brightness(1.06);
+}
+
 .footer {
     margin-top: 12px;
     color: var(--muted);
     font-size: 12px;
     text-align: center;
+}
+
+@media (max-width: 420px) {
+    .hud {
+        width: calc(100vw - 24px);
+        right: 12px;
+        left: 12px;
+    }
+
+    .editor-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 ::-webkit-scrollbar {

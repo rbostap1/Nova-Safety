@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 
-author 'GitHub Copilot'
+author 'Ryan Bostaph'
 description 'Nova Safety - configurable safety zones with HUD'
 version '1.0.0'
 

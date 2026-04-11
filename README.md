@@ -8,6 +8,8 @@ Nova-Safety is a configurable FiveM safety-zone resource with a toggleable HUD a
 - Current player coordinates and active zone display
 - List of all configured safety zones in the HUD
 - Safety-area enter message when a player enters a zone
+- Add new safety zones from the HUD and save them to `config.lua`
+- Optional Discord role locking for the HUD and zone editor
 
 ## Resource Setup
 
@@ -22,6 +24,17 @@ ensure Nova-Safety
 - Use `/Novasafe` in-game to toggle the HUD.
 - Edit `config.lua` to add, remove, or adjust safety zones.
 - Entering a configured zone will show a safety-area warning message.
+- Use the HUD editor to create a new zone and write it directly into `config.lua`.
+
+The HUD editor includes a `Use Current Position` button so you can quickly build a zone around where you are standing.
+
+## Discord Access Control
+
+Set `Config.HudAccess.Enabled = true` to require Discord-based access before the HUD and zone editor can be opened.
+
+- Use `Provider = 'Badger_Discord_API'` with role IDs in `BadgerRoles`.
+- Use `Provider = 'DiscordAcePerms'` with an ACE permission in `AcePermission`.
+- If access is denied, the player sees the message configured in `DenyMessage`.
 
 ## Install
 

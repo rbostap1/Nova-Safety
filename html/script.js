@@ -7,8 +7,16 @@ const zoneRadius = document.getElementById('zoneRadius');
 const zoneList = document.getElementById('zoneList');
 const toast = document.getElementById('toast');
 const safetyBanner = document.getElementById('safetyBanner');
+const zoneInputName = document.getElementById('zoneInputName');
+const zoneInputX = document.getElementById('zoneInputX');
+const zoneInputY = document.getElementById('zoneInputY');
+const zoneInputZ = document.getElementById('zoneInputZ');
+const zoneInputRadius = document.getElementById('zoneInputRadius');
+const useCurrentCoordsButton = document.getElementById('useCurrentCoords');
+const saveZoneButton = document.getElementById('saveZoneButton');
 
 let toastTimer = null;
+let lastKnownCoords = { x: 0, y: 0, z: 0 };
 
 const formatZoneMeta = (zone, showRadius) => {
     const coords = Array.isArray(zone.coords)
@@ -62,6 +70,40 @@ const showToast = (message) => {
     }, 7000);
 };
 
+const populateCurrentCoords = () => {
+    zoneInputX.value = Number(lastKnownCoords.x || 0).toFixed(2);
+    zoneInputY.value = Number(lastKnownCoords.y || 0).toFixed(2);
+    zoneInputZ.value = Number(lastKnownCoords.z || 0).toFixed(2);
+};
+
+const saveZone = async () => {
+    const payload = {
+        name: zoneInputName.value.trim(),
+        x: Number(zoneInputX.value),
+        y: Number(zoneInputY.value),
+        z: Number(zoneInputZ.value),
+        radius: Number(zoneInputRadius.value)
+    };
+
+    if (!payload.name || Number.isNaN(payload.x) || Number.isNaN(payload.y) || Number.isNaN(payload.z) || Number.isNaN(payload.radius)) {
+        showToast('Enter a name, coordinates, and radius before saving the zone.');
+        return;
+    }
+
+    await fetch(`https://${GetParentResourceName()}/addZone`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    showToast(`Requested add of safety zone "${payload.name}".`);
+};
+
+useCurrentCoordsButton?.addEventListener('click', populateCurrentCoords);
+saveZoneButton?.addEventListener('click', saveZone);
+
 window.addEventListener('message', (event) => {
     const data = event.data;
 
@@ -70,11 +112,12 @@ window.addEventListener('message', (event) => {
         return;
     }
 
-    if (data.action !== 'updateHud') {
-        if (data.action === 'zoneEntered') {
-            showToast(data.message || 'You have entered a safety area.');
-        }
+    if (data.action === 'notify') {
+        showToast(data.message || 'Safety zone update received.');
+        return;
+    }
 
+    if (data.action !== 'updateHud') {
         return;
     }
 
@@ -87,6 +130,7 @@ window.addEventListener('message', (event) => {
     zoneStatus.style.background = data.currentZone?.active ? 'rgba(112, 240, 180, 0.14)' : 'rgba(255, 255, 255, 0.08)';
     zoneStatus.style.color = data.currentZone?.active ? '#70f0b4' : '#f4f7fb';
     safetyBanner.classList.toggle('hidden', !data.currentZone?.active);
+    lastKnownCoords = data.currentCoords || lastKnownCoords;
 
     renderZones(data.zones || [], data.currentZone?.name || 'None', Boolean(data.showRadius));
 });
