@@ -6,7 +6,7 @@
 Config = {}
 
 Config.Command = 'Novasafe'
-Config.DefaultHudVisible = true
+Config.DefaultHudVisible = false
 Config.ShowZoneRadius = true
 Config.RefreshIntervalMs = 250
 
