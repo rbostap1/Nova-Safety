@@ -38,6 +38,9 @@ end
 local function setHudVisible(visible)
     hudVisible = visible == true
 
+    SetNuiFocus(hudVisible, hudVisible)
+    SetNuiFocusKeepInput(false)
+
     SendNUIMessage({
         action = 'setVisible',
         visible = hudVisible
@@ -97,6 +100,7 @@ updateHud = function(playerCoords)
     SendNUIMessage({
         action = 'updateHud',
         visible = hudVisible,
+        hudBrand = Config.HudBrand or {},
         currentPosition = formatCoords(playerCoords),
         currentCoords = currentPlayerCoords,
         currentZone = {
@@ -110,14 +114,9 @@ updateHud = function(playerCoords)
     })
 
     if zoneJustEntered then
-        showSafetyNotification(string.format(
-            'You have entered %s. This is a safety area. Violating roleplay is not to take place in or near these areas.',
-            zone.name
-        ))
-        showUiNotification(string.format(
-            'You have entered %s. This is a safety area. Violating roleplay is not to take place in or near these areas.',
-            zone.name
-        ))
+        local safeAreaMessage = string.format('Safe Area: %s, no vilant RP is to take place here.', zone.name)
+        showSafetyNotification(safeAreaMessage)
+        showUiNotification(safeAreaMessage)
     end
 end
 
@@ -166,6 +165,24 @@ end)
 
 RegisterNUICallback('addZone', function(data, cb)
     TriggerServerEvent('nova-safety:server:addZone', data)
+    cb({ ok = true })
+end)
+
+RegisterNUICallback('editZone', function(data, cb)
+    TriggerServerEvent('nova-safety:server:editZone', data)
+    cb({ ok = true })
+end)
+
+RegisterNUICallback('deleteZone', function(data, cb)
+    TriggerServerEvent('nova-safety:server:deleteZone', data)
+    cb({ ok = true })
+end)
+
+RegisterNUICallback('closeHud', function(_, cb)
+    if hudVisible then
+        TriggerServerEvent('nova-safety:server:requestHudToggle')
+    end
+
     cb({ ok = true })
 end)
 

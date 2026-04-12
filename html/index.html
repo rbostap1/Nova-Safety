@@ -11,9 +11,12 @@
         <div class="shell">
             <div id="toast" class="toast" aria-live="polite"></div>
             <header class="header">
-                <div>
-                    <p class="eyebrow">Nova Safety</p>
+                <div class="brand-wrap">
+                    <img id="hudLogo" class="hud-logo hidden" alt="HUD Logo" />
+                    <div>
+                    <p id="hudName" class="eyebrow">Nova Safety</p>
                     <h1>Safety Zones</h1>
+                    </div>
                 </div>
                 <div class="status" id="zoneStatus">Active</div>
             </header>
@@ -50,8 +53,8 @@
 
             <section class="panel editor-panel">
                 <div class="list-header">
-                    <span>Add Safety Zone</span>
-                    <span class="hint">Saves to config.lua</span>
+                    <span id="editorTitle">Add Safety Zone</span>
+                    <span class="hint" id="editorHint">Saves to config.lua</span>
                 </div>
                 <div class="editor-grid">
                     <label class="editor-field editor-field-wide">
@@ -74,10 +77,11 @@
                     </div>
                     <label class="editor-field editor-field-wide">
                         <span class="label">Radius</span>
-                        <input id="zoneInputRadius" type="number" step="0.01" min="1" placeholder="100.0" />
+                        <input id="zoneInputRadius" type="number" step="0.01" min="1" value="5" placeholder="5.0" />
                     </label>
                     <div class="editor-actions">
                         <button id="useCurrentCoords" type="button">Use Current Position</button>
+                        <button id="cancelEditButton" type="button" class="hidden">Cancel Edit</button>
                         <button id="saveZoneButton" type="button" class="primary">Add Safety Zone</button>
                     </div>
                 </div>

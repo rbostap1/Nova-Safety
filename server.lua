@@ -1,6 +1,12 @@
 local hudStates = {}
 
 local function serializeZone(zone)
+    local coords = zone.coords
+    local x = tonumber(coords.x or coords[1] or 0.0) or 0.0
+    local y = tonumber(coords.y or coords[2] or 0.0) or 0.0
+    local z = tonumber(coords.z or coords[3] or 0.0) or 0.0
+    local radius = tonumber(zone.radius or 0.0) or 0.0
+
     return string.format(
         [[
     {
@@ -9,14 +15,27 @@ local function serializeZone(zone)
         radius = %.2f
     }]],
         zone.name,
-        zone.coords.x,
-        zone.coords.y,
-        zone.coords.z,
-        zone.radius
+        x,
+        y,
+        z,
+        radius
     )
 end
 
-local function appendZoneToConfig(zone)
+local function serializeZones(zones)
+    local serialized = {}
+
+    for index, zone in ipairs(zones) do
+        serialized[#serialized + 1] = serializeZone(zone)
+        if index < #zones then
+            serialized[#serialized] = serialized[#serialized] .. ','
+        end
+    end
+
+    return 'Config.Zones = {' .. table.concat(serialized) .. '\n}'
+end
+
+local function saveZonesToConfig(zones)
     local resourceName = GetCurrentResourceName()
     local configContent = LoadResourceFile(resourceName, 'config.lua')
 
@@ -24,14 +43,39 @@ local function appendZoneToConfig(zone)
         return false, 'Unable to read config.lua.'
     end
 
-    local closeStart = configContent:find('}%s*$')
-    if not closeStart then
+    local zonesStart, zonesLabelEnd = configContent:find('Config%.Zones%s*=%s*{')
+    if not zonesStart then
+        return false, 'Unable to locate Config.Zones in config.lua.'
+    end
+
+    local openBracePos = configContent:find('{', zonesLabelEnd)
+    if not openBracePos then
+        return false, 'Unable to parse Config.Zones in config.lua.'
+    end
+
+    local depth = 0
+    local closeBracePos = nil
+
+    for cursor = openBracePos, #configContent do
+        local char = configContent:sub(cursor, cursor)
+        if char == '{' then
+            depth = depth + 1
+        elseif char == '}' then
+            depth = depth - 1
+            if depth == 0 then
+                closeBracePos = cursor
+                break
+            end
+        end
+    end
+
+    if not closeBracePos then
         return false, 'Unable to locate the end of Config.Zones in config.lua.'
     end
 
-    local prefix = configContent:sub(1, closeStart - 1):gsub('%s*$', '')
-    local suffix = configContent:sub(closeStart)
-    local updatedContent = prefix .. ',' .. serializeZone(zone) .. '\n' .. suffix
+    local prefix = configContent:sub(1, zonesStart - 1)
+    local suffix = configContent:sub(closeBracePos + 1)
+    local updatedContent = prefix .. serializeZones(zones) .. suffix
 
     local saved = SaveResourceFile(resourceName, 'config.lua', updatedContent, #updatedContent)
     if not saved then
@@ -39,6 +83,28 @@ local function appendZoneToConfig(zone)
     end
 
     return true
+end
+
+local function parseZoneInput(zoneData)
+    local name = tostring(zoneData and zoneData.name or ''):gsub('^%s+', ''):gsub('%s+$', '')
+    local x = tonumber(zoneData and zoneData.x)
+    local y = tonumber(zoneData and zoneData.y)
+    local z = tonumber(zoneData and zoneData.z)
+    local radius = tonumber(zoneData and zoneData.radius)
+
+    if name == '' or not x or not y or not z or not radius or radius <= 0 then
+        return nil, 'Invalid zone data. Name, coordinates, and radius are required.'
+    end
+
+    return {
+        name = name,
+        coords = vector3(x, y, z),
+        radius = radius
+    }
+end
+
+local function syncZonesToClients(target)
+    TriggerClientEvent('nova-safety:client:setZones', target or -1, Config.Zones or {})
 end
 
 local function getHudAccessConfig()
@@ -198,40 +264,96 @@ RegisterNetEvent('nova-safety:server:addZone', function(zoneData)
         return
     end
 
-    local name = tostring(zoneData and zoneData.name or ''):gsub('^%s+', ''):gsub('%s+$', '')
-    local x = tonumber(zoneData and zoneData.x)
-    local y = tonumber(zoneData and zoneData.y)
-    local z = tonumber(zoneData and zoneData.z)
-    local radius = tonumber(zoneData and zoneData.radius)
-
-    if name == '' or not x or not y or not z or not radius or radius <= 0 then
-        TriggerClientEvent('nova-safety:client:notify', sourceId, 'Invalid zone data. Name, coordinates, and radius are required.')
+    local parsedZone, parseError = parseZoneInput(zoneData)
+    if not parsedZone then
+        TriggerClientEvent('nova-safety:client:notify', sourceId, parseError)
         return
     end
 
-    local newZone = {
-        name = name,
-        coords = {
-            x = x,
-            y = y,
-            z = z
-        },
-        radius = radius
-    }
+    table.insert(Config.Zones, parsedZone)
 
-    local success, errorMessage = appendZoneToConfig(newZone)
+    local success, errorMessage = saveZonesToConfig(Config.Zones)
     if not success then
+        table.remove(Config.Zones, #Config.Zones)
         TriggerClientEvent('nova-safety:client:notify', sourceId, errorMessage or 'Unable to save the new safety zone.')
         return
     end
 
-    table.insert(Config.Zones, {
-        name = newZone.name,
-        coords = vector3(newZone.coords.x, newZone.coords.y, newZone.coords.z),
-        radius = newZone.radius
-    })
-
-    TriggerClientEvent('nova-safety:client:setZones', -1, Config.Zones)
+    syncZonesToClients(-1)
     TriggerClientEvent('nova-safety:client:refreshHud', sourceId)
-    TriggerClientEvent('nova-safety:client:notify', sourceId, string.format('Added safety zone "%s" and saved it to config.lua.', newZone.name))
+    TriggerClientEvent('nova-safety:client:notify', sourceId, string.format('Added safety zone "%s" and saved it to config.lua.', parsedZone.name))
+end)
+
+RegisterNetEvent('nova-safety:server:editZone', function(zoneData)
+    local sourceId = source
+
+    if not canAccessHud(sourceId) then
+        denyHudAccess(sourceId)
+        return
+    end
+
+    local zoneIndex = tonumber(zoneData and zoneData.index)
+    if not zoneIndex then
+        TriggerClientEvent('nova-safety:client:notify', sourceId, 'Invalid zone index.')
+        return
+    end
+
+    zoneIndex = math.floor(zoneIndex) + 1
+    if zoneIndex < 1 or zoneIndex > #Config.Zones then
+        TriggerClientEvent('nova-safety:client:notify', sourceId, 'Zone no longer exists.')
+        return
+    end
+
+    local parsedZone, parseError = parseZoneInput(zoneData)
+    if not parsedZone then
+        TriggerClientEvent('nova-safety:client:notify', sourceId, parseError)
+        return
+    end
+
+    local previousZone = Config.Zones[zoneIndex]
+    Config.Zones[zoneIndex] = parsedZone
+
+    local success, errorMessage = saveZonesToConfig(Config.Zones)
+    if not success then
+        Config.Zones[zoneIndex] = previousZone
+        TriggerClientEvent('nova-safety:client:notify', sourceId, errorMessage or 'Unable to save edited safety zone.')
+        return
+    end
+
+    syncZonesToClients(-1)
+    TriggerClientEvent('nova-safety:client:refreshHud', sourceId)
+    TriggerClientEvent('nova-safety:client:notify', sourceId, string.format('Updated safety zone "%s".', parsedZone.name))
+end)
+
+RegisterNetEvent('nova-safety:server:deleteZone', function(zoneData)
+    local sourceId = source
+
+    if not canAccessHud(sourceId) then
+        denyHudAccess(sourceId)
+        return
+    end
+
+    local zoneIndex = tonumber(zoneData and zoneData.index)
+    if not zoneIndex then
+        TriggerClientEvent('nova-safety:client:notify', sourceId, 'Invalid zone index.')
+        return
+    end
+
+    zoneIndex = math.floor(zoneIndex) + 1
+    if zoneIndex < 1 or zoneIndex > #Config.Zones then
+        TriggerClientEvent('nova-safety:client:notify', sourceId, 'Zone no longer exists.')
+        return
+    end
+
+    local removedZone = table.remove(Config.Zones, zoneIndex)
+    local success, errorMessage = saveZonesToConfig(Config.Zones)
+    if not success then
+        table.insert(Config.Zones, zoneIndex, removedZone)
+        TriggerClientEvent('nova-safety:client:notify', sourceId, errorMessage or 'Unable to delete safety zone.')
+        return
+    end
+
+    syncZonesToClients(-1)
+    TriggerClientEvent('nova-safety:client:refreshHud', sourceId)
+    TriggerClientEvent('nova-safety:client:notify', sourceId, string.format('Deleted safety zone "%s".', removedZone.name))
 end)

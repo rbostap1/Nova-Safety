@@ -97,6 +97,22 @@ html, body {
     margin-bottom: 14px;
 }
 
+.brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hud-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 5px;
+}
+
 .eyebrow {
     margin: 0 0 4px;
     text-transform: uppercase;
@@ -204,6 +220,32 @@ h1 {
     line-height: 1.4;
 }
 
+.zone-item-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.zone-item-actions button {
+    border: 0;
+    border-radius: 10px;
+    padding: 7px 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.zone-item-actions button.zone-delete {
+    background: rgba(255, 112, 112, 0.18);
+    color: #ffd7d7;
+}
+
+.zone-item-actions button:hover {
+    filter: brightness(1.06);
+}
+
 .zone-pill {
     padding: 4px 8px;
     border-radius: 999px;
@@ -272,6 +314,10 @@ h1 {
 
 .editor-actions button:hover {
     filter: brightness(1.06);
+}
+
+.hidden {
+    display: none;
 }
 
 .footer {
