@@ -43,49 +43,90 @@
                 </div>
             </section>
 
-            <section class="panel list-panel">
-                <div class="list-header">
-                    <span>Current Safety Zones</span>
-                    <span class="hint">Configured in config.lua</span>
-                </div>
-                <div id="zoneList" class="zone-list"></div>
-            </section>
+            <div class="hud-screens">
+                <section id="screenZoneList" class="panel list-panel screen visible">
+                    <div class="list-header">
+                        <span>Active Safety Zones</span>
+                        <span class="hint">Configured in config.lua</span>
+                    </div>
+                    <div id="zoneList" class="zone-list"></div>
+                    <div class="screen-actions">
+                        <button id="openAddScreenButton" type="button" class="primary">Add New Safe Zone</button>
+                    </div>
+                </section>
 
-            <section class="panel editor-panel">
-                <div class="list-header">
-                    <span id="editorTitle">Add Safety Zone</span>
-                    <span class="hint" id="editorHint">Saves to config.lua</span>
-                </div>
-                <div class="editor-grid">
-                    <label class="editor-field editor-field-wide">
-                        <span class="label">Name</span>
-                        <input id="zoneInputName" type="text" placeholder="Police Station" />
-                    </label>
-                    <div class="editor-row">
-                        <label class="editor-field">
-                            <span class="label">X</span>
-                            <input id="zoneInputX" type="number" step="0.01" placeholder="0.00" />
-                        </label>
-                        <label class="editor-field">
-                            <span class="label">Y</span>
-                            <input id="zoneInputY" type="number" step="0.01" placeholder="0.00" />
-                        </label>
-                        <label class="editor-field">
-                            <span class="label">Z</span>
-                            <input id="zoneInputZ" type="number" step="0.01" placeholder="0.00" />
-                        </label>
+                <section id="screenAddZone" class="panel editor-panel screen hidden">
+                    <div class="list-header">
+                        <span>Add Safety Zone</span>
+                        <span class="hint">Saves to config.lua</span>
                     </div>
-                    <label class="editor-field editor-field-wide">
-                        <span class="label">Radius</span>
-                        <input id="zoneInputRadius" type="number" step="0.01" min="1" value="5" placeholder="5.0" />
-                    </label>
-                    <div class="editor-actions">
-                        <button id="useCurrentCoords" type="button">Use Current Position</button>
-                        <button id="cancelEditButton" type="button" class="hidden">Cancel Edit</button>
-                        <button id="saveZoneButton" type="button" class="primary">Add Safety Zone</button>
+                    <div class="editor-grid">
+                        <label class="editor-field editor-field-wide">
+                            <span class="label">Name</span>
+                            <input id="addZoneInputName" type="text" placeholder="Police Station" />
+                        </label>
+                        <div class="editor-row">
+                            <label class="editor-field">
+                                <span class="label">X</span>
+                                <input id="addZoneInputX" type="number" step="0.01" placeholder="0.00" />
+                            </label>
+                            <label class="editor-field">
+                                <span class="label">Y</span>
+                                <input id="addZoneInputY" type="number" step="0.01" placeholder="0.00" />
+                            </label>
+                            <label class="editor-field">
+                                <span class="label">Z</span>
+                                <input id="addZoneInputZ" type="number" step="0.01" placeholder="0.00" />
+                            </label>
+                        </div>
+                        <label class="editor-field editor-field-wide">
+                            <span class="label">Radius</span>
+                            <input id="addZoneInputRadius" type="number" step="0.01" min="1" value="5" placeholder="5.0" />
+                        </label>
+                        <div class="editor-actions">
+                            <button id="addUseCurrentCoords" type="button">Use Current Position</button>
+                            <button id="addCancelButton" type="button">Back to Zones</button>
+                            <button id="addSaveZoneButton" type="button" class="primary">Save Zone</button>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+
+                <section id="screenEditZone" class="panel editor-panel screen hidden">
+                    <div class="list-header">
+                        <span>Edit Safety Zone</span>
+                        <span class="hint">Updates config.lua</span>
+                    </div>
+                    <div class="editor-grid">
+                        <label class="editor-field editor-field-wide">
+                            <span class="label">Name</span>
+                            <input id="editZoneInputName" type="text" placeholder="Police Station" />
+                        </label>
+                        <div class="editor-row">
+                            <label class="editor-field">
+                                <span class="label">X</span>
+                                <input id="editZoneInputX" type="number" step="0.01" placeholder="0.00" />
+                            </label>
+                            <label class="editor-field">
+                                <span class="label">Y</span>
+                                <input id="editZoneInputY" type="number" step="0.01" placeholder="0.00" />
+                            </label>
+                            <label class="editor-field">
+                                <span class="label">Z</span>
+                                <input id="editZoneInputZ" type="number" step="0.01" placeholder="0.00" />
+                            </label>
+                        </div>
+                        <label class="editor-field editor-field-wide">
+                            <span class="label">Radius</span>
+                            <input id="editZoneInputRadius" type="number" step="0.01" min="1" value="5" placeholder="5.0" />
+                        </label>
+                        <div class="editor-actions">
+                            <button id="editUseCurrentCoords" type="button">Use Current Position</button>
+                            <button id="editCancelButton" type="button">Back to Zones</button>
+                            <button id="editSaveZoneButton" type="button" class="primary">Save Changes</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
 
             <footer class="footer">
                 Toggle with /Novasafe

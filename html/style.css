@@ -178,6 +178,32 @@ h1 {
     background: rgba(20, 24, 36, 0.95);
 }
 
+.screen {
+    display: block;
+}
+
+.screen.hidden {
+    display: none;
+}
+
+.screen-actions {
+    margin-top: 12px;
+}
+
+.screen-actions button {
+    border: 0;
+    border-radius: 12px;
+    padding: 11px 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: #08111a;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.screen-actions button:hover {
+    filter: brightness(1.06);
+}
+
 .list-header {
     display: flex;
     justify-content: space-between;
